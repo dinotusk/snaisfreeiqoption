@@ -1,0 +1,51 @@
+import json
+import requests
+from time import sleep
+from threading import Thread, Lock
+
+ 
+global config
+config = {'url': 'https://api.telegram.org/bot2085693652:AAGiEKsrsiH60urxGiJyS2qXLlr2aMLlpUc/', 'lock': Lock()}
+
+
+def del_update(date):
+    global config 
+     
+    config['lock'].acquire()
+    requests.post(config['url'] + 'getUpdates', {'offset': data['update_id']+1})
+    config['lock'].release()
+
+def send_message(data, msg):
+    global config
+    
+    config['lock'].acquire()
+    requests.post(config['url'] + 'sendMessage',  {'chat_id': data['message']['chat']['id'], 'text': str(msg)})
+    config['lock'].release()
+
+
+while True:
+    
+    while True:
+        try:
+            x = json.loads(requests.get(config['url'] + 'getUpdates').text)
+            break
+            
+        except Exception as e:          
+            x = {'result': []}
+            if 'Failed to establish a new connection' in str(e):
+                print('Perca de conexão')
+            else:
+                print('Erro desconhecido: ' + str(e))            
+
+               
+                
+    if len(x['result']) > 0:
+        for data in x['result']:  
+         Thread(target=del_update, args=(data, )).start()
+           
+           
+         print(json.dumps(data, indent=1))
+         Thread(target=send_message, args=(data,'eae meu chapa' )).start()
+         
+         
+        sleep(1.5)
